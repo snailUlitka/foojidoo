@@ -64,7 +64,7 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["COM812"]
+ignore = ["COM812", "D"]
 
 exclude = []
 
