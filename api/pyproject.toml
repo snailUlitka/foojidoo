@@ -9,6 +9,7 @@ requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.16.2",
     "fastapi[standard]>=0.115.13",
+    "psycopg2-binary>=2.9.10",
     "pydantic>=2.11.7",
     "pydantic-settings>=2.10.0",
     "sqlalchemy>=2.0.41",
@@ -56,6 +57,7 @@ exclude = [
     "dist",
     "node_modules",
     "site-packages",
+    "alembic/versions"
 ]
 
 line-length = 88

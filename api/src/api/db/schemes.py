@@ -1,13 +1,22 @@
 from datetime import UTC, datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    ForeignKeyConstraint,
+    Integer,
+    Numeric,
+    String,
+    Text,
+)
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "user"
 
     user_id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
@@ -15,12 +24,12 @@ class User(Base):
     address = Column(String, nullable=False)
     password = Column(String, nullable=False)
 
-    orders = relationship("Order", back_populates="user")
+    order = relationship("Order", back_populates="user")
     items = relationship("OrderDish", back_populates="user")
 
 
 class Restaurant(Base):
-    __tablename__ = "restaurants"
+    __tablename__ = "restaurant"
 
     restaurant_id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
@@ -37,7 +46,9 @@ class Dish(Base):
 
     dish_id = Column(Integer, primary_key=True)
     restaurant_id = Column(
-        Integer, ForeignKey("restaurants.restaurant_id"), primary_key=True
+        Integer,
+        ForeignKey("restaurant.restaurant_id"),
+        primary_key=True,
     )
     name = Column(String, nullable=False)
     description = Column(Text)
@@ -48,30 +59,48 @@ class Dish(Base):
 
 
 class Order(Base):
-    __tablename__ = "orders"
+    __tablename__ = "order"
 
-    user_id = Column(Integer, ForeignKey("users.user_id"), primary_key=True)
+    user_id = Column(Integer, ForeignKey("user.user_id"), primary_key=True)
     status = Column(String, nullable=False)
     payment_method = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.now(UTC))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
-    user = relationship("User", back_populates="orders")
+    user = relationship("User", back_populates="order")
     items = relationship("OrderDish", back_populates="order")
 
 
 class OrderDish(Base):
     __tablename__ = "order_dish"
 
-    dish_id = Column(Integer, ForeignKey("dish.dish_id"), primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.user_id"), primary_key=True)
-    restaurant_id = Column(
-        Integer, ForeignKey("restaurants.restaurant_id"), primary_key=True
-    )
+    dish_id = Column(Integer, primary_key=True)
+    restaurant_id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, primary_key=True)
     quantity = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["dish_id", "restaurant_id"],
+            ["dish.dish_id", "dish.restaurant_id"],
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["user_id"],
+            ["user.user_id"],
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["restaurant_id"],
+            ["restaurant.restaurant_id"],
+            ondelete="CASCADE",
+        ),
+    )
 
     user = relationship("User", back_populates="items")
     restaurant = relationship("Restaurant", back_populates="items")
     dish = relationship("Dish", back_populates="items")
     order = relationship(
-        "Order", primaryjoin="OrderDish.user_id==Order.user_id", back_populates="items"
+        "Order",
+        primaryjoin="OrderDish.user_id == Order.user_id",
+        back_populates="items",
     )
