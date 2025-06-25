@@ -1,11 +1,16 @@
 from functools import cache
 
-from pydantic import PostgresDsn, field_validator
+from pydantic import PostgresDsn, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     database_url: PostgresDsn
+
+    access_token_expire_minutes: int
+    refresh_token_expire_days: int
+    token_secret_key: SecretStr
+    token_algorithm: str
 
     @classmethod
     @field_validator("db")
@@ -24,4 +29,4 @@ class Settings(BaseSettings):
 
 @cache
 def get_settings() -> Settings:
-    return Settings()
+    return Settings()  # type: ignore[reportCallIssue]
