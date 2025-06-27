@@ -1,9 +1,10 @@
 import uvicorn
 from fastapi import FastAPI
 
+from api import __version__
 from api.routers import auth, order, restaurant, user
 
-app = FastAPI()
+app = FastAPI(title="foojidoo", version=__version__)
 
 app.include_router(auth.router, prefix="/auth")
 app.include_router(order.router, prefix="/order")
