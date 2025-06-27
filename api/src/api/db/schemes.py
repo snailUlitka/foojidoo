@@ -71,7 +71,7 @@ class Restaurant(Base):
 class Dish(Base):
     __tablename__ = "dish"
 
-    dish_id = Column(Integer, primary_key=True)
+    dish_id = Column(Integer, autoincrement=True, primary_key=True)
     restaurant_id = Column(
         Integer,
         ForeignKey("restaurant.restaurant_id", ondelete="CASCADE"),

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from api.db.database import get_db
 from api.db.schemes import User
 from api.repositories.order import OrderRepository
+from api.repositories.restaurant import RestaurantRepository
 from api.repositories.user import UserRepository
 from api.services.auth import verify_token
 from api.settings import Settings, get_settings
@@ -20,6 +21,12 @@ def get_user_repo(db: Annotated[Session, Depends(get_db)]) -> UserRepository:
 
 def get_order_repo(db: Annotated[Session, Depends(get_db)]) -> OrderRepository:
     return OrderRepository(db)
+
+
+def get_restaurant_repo(
+    db: Annotated[Session, Depends(get_db)],
+) -> RestaurantRepository:
+    return RestaurantRepository(db)
 
 
 def get_current_user(
