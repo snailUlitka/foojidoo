@@ -23,15 +23,17 @@ class User(Base):
     phone = Column(String, nullable=False)
     address = Column(String, nullable=False)
     password = Column(String, nullable=False)
-
     order = relationship(
         "Order",
         back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
         uselist=False,
     )
     items = relationship(
         "OrderDish",
         back_populates="user",
+        cascade="all, delete-orphan",
         primaryjoin="User.user_id == OrderDish.user_id",
         foreign_keys="[OrderDish.user_id]",
         overlaps="items",
@@ -39,6 +41,8 @@ class User(Base):
     refresh_tokens = relationship(
         "RefreshToken",
         back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
 
