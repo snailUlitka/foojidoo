@@ -20,7 +20,7 @@ class UserRead(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    name: Annotated[str, StringConstraints(min_length=3)]
-    password: Annotated[str, StringConstraints(min_length=6)]
+    name: Annotated[str | None, StringConstraints(min_length=3)]
+    password: Annotated[str | None, StringConstraints(min_length=6)]
     phone: str | None
     address: str | None
