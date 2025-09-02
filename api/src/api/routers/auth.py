@@ -9,8 +9,13 @@ from api.repositories.token import TokenRepository
 from api.repositories.user import UserRepository
 from api.services.auth import create_tokens, verify_token
 from api.settings import Settings, get_settings
+from pydantic import BaseModel
 
 router = APIRouter(tags=["auth"])
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
 
 
 @router.post("/login")
@@ -38,22 +43,22 @@ def login(
 
 @router.post("/refresh")
 def refresh(
-    refresh_token: str,
+    payload: RefreshRequest,
     db: Annotated[Session, Depends(get_db)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> dict[str, Any]:
     try:
-        payload = verify_token(refresh_token, settings)
-        user_id = int(payload["sub"])
+        token_payload = verify_token(payload.refresh_token, settings)
+        user_id = int(token_payload["sub"])
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid token") from e
 
     token_repo = TokenRepository(db)
-    if not token_repo.is_refresh_token_valid(user_id, refresh_token):
+    if not token_repo.is_refresh_token_valid(user_id, payload.refresh_token):
         raise HTTPException(status_code=401, detail="Refresh expired")
 
     access_token, new_refresh, rt_expiry = create_tokens(user_id, settings)
-    token_repo.revoke_refresh_token(user_id, refresh_token)
+    token_repo.revoke_refresh_token(user_id, payload.refresh_token)
     token_repo.add_refresh_token(user_id, new_refresh, rt_expiry)
 
     return {
@@ -66,15 +71,15 @@ def refresh(
 
 @router.post("/logout")
 def logout(
-    refresh_token: str,
+    payload: RefreshRequest,
     db: Annotated[Session, Depends(get_db)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> dict[str, Any]:
     try:
-        payload = verify_token(refresh_token, settings)
-        user_id = int(payload["sub"])
+        token_payload = verify_token(payload.refresh_token, settings)
+        user_id = int(token_payload["sub"])
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid token") from e
 
-    TokenRepository(db).revoke_refresh_token(user_id, refresh_token)
+    TokenRepository(db).revoke_refresh_token(user_id, payload.refresh_token)
     return {"detail": "Success logout"}

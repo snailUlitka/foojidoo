@@ -1,4 +1,5 @@
 from typing import Annotated
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -76,11 +77,15 @@ def view_current_order(
             )
         )
 
+    created_at = order.created_at
+    if not isinstance(created_at, datetime):
+        created_at = datetime.now(UTC)
+
     return OrderRead(
         user_id=order.user_id,
         status=order.status,
         payment_method=order.payment_method,
-        created_at=order.created_at,
+        created_at=created_at,
         items=items,
     )
 
